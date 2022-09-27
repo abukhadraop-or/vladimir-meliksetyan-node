@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   User.init(
     {
-        id: {
+      id: {
         type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
