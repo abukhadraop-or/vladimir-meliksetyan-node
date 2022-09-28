@@ -21,7 +21,7 @@ const UserMock = DBConnectionMock.define(
   }
 );
 
-describe("unit testing /auth/login route", function () {
+describe("unit testing /user/login route", function () {
   it("login controller", async function () {
     const save = stub(User);
     let results;
