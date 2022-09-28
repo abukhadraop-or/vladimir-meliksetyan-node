@@ -1,39 +1,42 @@
-/* eslint-disable no-undef */
-const { stub, assert } = require("sinon");
-const SequelizeMock = require("sequelize-mock");
 const { userLogin } = require("../controllers/userControllers");
-const DBConnectionMock = new SequelizeMock();
 const { User } = require("../models");
 
-const UserMock = DBConnectionMock.define(
-  "User",
-  {
-    id: "3c9d7415-16de-4066-b910-594c87b29b5e",
-    email: "josh.smith@optimumparners.co",
-    password: "password",
-  },
-  {
-    instanceMethods: {
-      myTestFunc: function () {
-        return "Test User";
-      },
-    },
-  }
-);
+jest.mock("../models");
+jest.mock("jsonwebtoken");
 
-describe("unit testing /user/login route", function () {
-  it("login controller", async function () {
-    const save = stub(User);
-    let results;
-    const mockRequest = {
-      body: {
-        email: "josh.smith@optimumparners.co",
-        password: "password",
+const results = {};
+
+const mockResponse = {
+  send: (message) => {
+    results.message = message;
+    return mockResponse;
+  },
+  status: (code) => {
+    results.code = code;
+    return mockResponse;
+  },
+};
+
+const mockRequest = {
+  body: {
+    email: "000@000.000",
+    password: "000",
+  },
+};
+
+describe("unit testing /user/register route", () => {
+  it("login controller", async () => {
+    jest.spyOn(User, "findOne").mockResolvedValue({
+      dataValues: {
+        password:
+          "$2b$10$PpW32e3Bc5NnsH//nGNrSeBsWDXq/zTII04AztAzZ5fMGOER9drdW",
       },
-    };
-    await userLogin(mockRequest, (res) => (results = res));
-    assert.calledWith(save, UserMock);
-    save.restore();
-    expect(results).toHaveProperty("id");
+    });
+    await userLogin(mockRequest, mockResponse);
+
+    expect(User.findOne).toHaveBeenCalledWith({
+      where: { email: mockRequest.body.email },
+    });
+    expect(results).toHaveProperty("code", 200);
   });
 });

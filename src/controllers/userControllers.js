@@ -5,8 +5,8 @@ const { User } = require("../models");
 
 /**
  * create new user and add it to database with uniqe ID
- * @param {HTTP request} req 
- * @param {HTTP response} res 
+ * @param {HTTP request} req
+ * @param {HTTP response} res
  */
 const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
@@ -19,7 +19,7 @@ const registerUser = async (req, res) => {
     res.status(409).send("User Already exists with this email");
   } else {
     try {
-      await User.create({
+      const result = await User.create({
         id,
         username,
         email,
@@ -33,16 +33,14 @@ const registerUser = async (req, res) => {
 };
 
 /**
- * 
- * @param {HTTP request} req 
- * @param {HTTP response} res 
+ *
+ * @param {HTTP request} req
+ * @param {HTTP response} res
  */
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   // find user with email
-  const foundUser = await User.findOne({ where: { email } });
-  // take found user data
-  const user = foundUser.dataValues;
+  const { dataValues: user } = await User.findOne({ where: { email } });
   // authorize user
   const token = jwt.sign(user, process.env.JWT_ACCESS_SECRET);
   // check password validation

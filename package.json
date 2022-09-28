@@ -23,6 +23,7 @@
     "sequelize": "^6.21.6",
     "sequelize-cli": "^6.4.1",
     "sequelize-mock": "^0.10.2",
+    "sinon": "^14.0.0",
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {

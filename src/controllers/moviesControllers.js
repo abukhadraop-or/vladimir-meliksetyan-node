@@ -2,28 +2,29 @@ const { uuid } = require("uuidv4");
 const { movies } = require("../models");
 
 /**
- *  get all users movies 
+ *  get all users movies
  * @param {HTTP request} req
  * @param {HTTP response} res
  */
 const getAllMovies = async (req, res) => {
   const { id } = req.user;
   try {
-    // take movies from database with user id 
+    // take movies from database with user id
     const Movies = await movies.findAll({ where: { user_id: id } });
     if (Movies) {
       res.send(Movies).status(200);
-    } else res.send([]).json({ message: "no movies here " });
+    } else res.send([], "no Movies Here");
   } catch (error) {
     console.log(error);
   }
 };
 
 /**
- *  add movie to user's account 
- *  @param {HTTP request} req 
- *  @param {HTTP response} res 
+ *  add movie to user's account
+ *  @param {HTTP request} req
+ *  @param {HTTP response} res
  */
+ 
 const addMovie = async (req, res) => {
   const { id: user_id } = req.user;
   // take movie information from request
@@ -56,9 +57,9 @@ const addMovie = async (req, res) => {
 };
 
 /**
- *  get user's filtered movies 
- *  @param {HTTP request} req 
- *  @param {HTTP response} res 
+ *  get user's filtered movies
+ *  @param {HTTP request} req
+ *  @param {HTTP response} res
  */
 const getFilteredMovies = async (req, res) => {
   const { id: user_id } = req.user;
@@ -73,8 +74,8 @@ const getFilteredMovies = async (req, res) => {
 };
 /**
  *  delete movie from user's account
- *  @param {HTTP request} req 
- *  @param {HTTP response} res 
+ *  @param {HTTP request} req
+ *  @param {HTTP response} res
  */
 const deleteFilm = async (req, res) => {
   const { id } = req.body;
