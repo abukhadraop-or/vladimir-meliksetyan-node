@@ -1,14 +1,17 @@
 FROM node:16
 
-#create app directory
-WORKDIR /usr/src/app
 
-COPY package*.json ./
+ENV NODE_PATH=./src
 
-RUN npm install
 
-COPY . .
- 
-EXPOSE 8080
+WORKDIR /app
 
-CMD ["node","index.js"]
+COPY . /app
+
+RUN rm -rf node_modulesp
+RUN npm ci && npm cache clean --force --silent
+
+
+EXPOSE 80
+
+CMD ["npm", "run", "dev"]

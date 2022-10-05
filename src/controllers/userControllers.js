@@ -8,7 +8,7 @@ const { User } = require("../models");
  * @param {HTTP request} req
  * @param {HTTP response} res
  */
-const registerUser = async (req, res) => {
+const registerUser = async (req, res) => { 
   const { username, email, password } = req.body;
   const id = uuid();
   // hash password
@@ -40,12 +40,14 @@ const registerUser = async (req, res) => {
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
   // find user with email
-  const { dataValues: user } = await User.findOne({ where: { email } });
+  const user = await User.findOne({ where: { email } });
   // authorize user
-  const token = jwt.sign(user, process.env.JWT_ACCESS_SECRET);
+  const foundUser = user?.dataValues;
+
   // check password validation
-  if (user) {
+  if (foundUser) {
     const checkpassword = await bcrypt.compare(password, user.password);
+    const token = jwt.sign(foundUser, process.env.JWT_ACCESS_SECRET);
     if (checkpassword) {
       res.status(200).send({ token });
     } else res.send("wrong password");

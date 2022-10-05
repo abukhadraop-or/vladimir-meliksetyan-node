@@ -1,2 +1,5 @@
 node_modules
 package-lock.json
+Dockerfile
+.dockerignor
+.doker-compose.yml

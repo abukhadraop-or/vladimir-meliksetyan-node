@@ -24,9 +24,10 @@ const getAllMovies = async (req, res) => {
  *  @param {HTTP request} req
  *  @param {HTTP response} res
  */
- 
+
 const addMovie = async (req, res) => {
   const { id: user_id } = req.user;
+
   // take movie information from request
   const {
     original_language,
@@ -40,20 +41,25 @@ const addMovie = async (req, res) => {
     vote_average,
   } = req.body;
   // create movie in DB
-  await movies.create({
-    id: uuid(),
-    original_language,
-    backdrop_path,
-    original_title,
-    overview,
-    popularity,
-    poster_path,
-    release_date,
-    title,
-    vote_average,
-    user_id,
-  });
-  res.status(201);
+  try {
+    await movies.create({
+      id: uuid(),
+      original_language,
+      backdrop_path,
+      original_title,
+      overview,
+      popularity,
+      poster_path,
+      release_date,
+      title,
+      vote_average,
+      user_id,
+    });
+    res.status(201);
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error.message }).status("401");
+  }
 };
 
 /**
@@ -64,12 +70,17 @@ const addMovie = async (req, res) => {
 const getFilteredMovies = async (req, res) => {
   const { id: user_id } = req.user;
   const { filter } = req.body;
-  const filteredMovies = await movies.findAll({
-    where: { user_id },
-    order: [[filter.type, filter.value]],
-  });
-  if (filteredMovies) {
-    res.send(filteredMovies).status(201);
+  try {
+    const filteredMovies = await movies.findAll({
+      where: { user_id },
+      order: [[filter.type, filter.value]],
+    });
+    if (filteredMovies) {
+      res.send(filteredMovies).status(201);
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error.message }).status("401");
   }
 };
 /**
@@ -77,17 +88,39 @@ const getFilteredMovies = async (req, res) => {
  *  @param {HTTP request} req
  *  @param {HTTP response} res
  */
-const deleteFilm = async (req, res) => {
-  const { id } = req.body;
-  movies.destroy({
-    where: { id },
-  });
-  res.send(200);
+const deleteMovie = async (req, res) => {
+  const { id } = req.params;
+  try {
+    movies.destroy({
+      where: { id },
+    });
+    res.send(200);
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error.message }).status("401");
+  }
+};
+
+/**
+ *  update movie 
+ *  @param {HTTP request} req
+ *  @param {HTTP response} res
+ */
+const updateMovie = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await movies.update(req.body, { where: { id } });
+    res.status(201).send("Movie updated");
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error.message }).status(401);
+  }
 };
 
 module.exports = {
   getAllMovies,
   addMovie,
   getFilteredMovies,
-  deleteFilm,
+  deleteMovie,
+  updateMovie,
 };
