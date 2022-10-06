@@ -1,7 +1,7 @@
 const {
   getAllMovies,
   addMovie,
-  deleteFilm,
+  deleteMovie,
 } = require("../controllers/moviesControllers");
 const { movies } = require("../models");
 
@@ -16,6 +16,10 @@ const mockResponse = {
     results.code = code;
     return mockResponse;
   },
+  json: (message)=>{
+    results.message = message
+    return mockResponse
+  }
 };
 
 const mockRequest = {
@@ -23,6 +27,9 @@ const mockRequest = {
     id: "1eb05c97-6ecb-4325-8ad3-ffbbaf43a679",
   },
   body: {
+    id: "1eb05c97-6ecb-4325-8ad3-ffbbaf43a679",
+  },
+  params: {
     id: "1eb05c97-6ecb-4325-8ad3-ffbbaf43a679",
   },
 };
@@ -66,7 +73,7 @@ describe("unit testing /movies/getAllMovies route", () => {
   });
 
   it("delete movie", async () => {
-    await deleteFilm(mockRequest, mockResponse);
+    await deleteMovie(mockRequest, mockResponse);
     expect(movies.destroy).toHaveBeenCalledWith({
       where: { id: mockRequest.user.id },
     });

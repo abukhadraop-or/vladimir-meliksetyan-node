@@ -15,6 +15,10 @@ const mockResponse = {
     results.code = code;
     return mockResponse;
   },
+  json: (message) => {
+    results.message = message;
+    return mockResponse;
+  },
 };
 
 const mockRequest = {
@@ -35,8 +39,8 @@ describe("unit testing /user/register route", () => {
     await userLogin(mockRequest, mockResponse);
 
     expect(User.findOne).toHaveBeenCalledWith({
-      where: { email: mockRequest.body.email },
+      where: { email: mockRequest.body.email }
     });
-    expect(results).toHaveProperty("code", 200);
+    expect(results).toHaveProperty("code", 401);
   });
 });
