@@ -1,21 +1,28 @@
-const { uuid } = require("uuidv4");
-const { movies } = require("../models");
+const { Movie } = require("../models");
+const movie = require("../models/movie");
+const createResponse = require("../utils/create-response");
 
 /**
  *  get all users movies
  * @param {HTTP request} req
  * @param {HTTP response} res
  */
-const getAllMovies = async (req, res) => {
+const getUserMovies = async (req, res) => {
   const { id } = req.user;
+  const { filter } = req.body;
   try {
     // take movies from database with user id
-    const Movies = await movies.findAll({ where: { user_id: id } });
-    if (Movies) {
-      res.send(Movies).status(200);
-    } else res.send([], "no Movies Here");
+    const movies = await Movie.findAll({
+      where: { user_id: id },
+      order: filter ? [[filter.type, filter.value]] : [],
+    });
+    if (movies) {
+      res.send(movies).status(200);
+    } else res.json(createResponse(401, "now movies to show"));
   } catch (error) {
-    console.log(error);
+    if (error) {
+      res.send(error.message);
+    }
   }
 };
 
@@ -42,8 +49,7 @@ const addMovie = async (req, res) => {
   } = req.body;
   // create movie in DB
   try {
-    await movies.create({
-      id: uuid(),
+    await Movie.create({
       original_language,
       backdrop_path,
       original_title,
@@ -57,32 +63,12 @@ const addMovie = async (req, res) => {
     });
     res.status(201);
   } catch (error) {
-    console.log(error);
-    res.json({ message: error.message }).status("401");
+    if (error) {
+      res.send(error.message);
+    }
   }
 };
 
-/**
- *  get user's filtered movies
- *  @param {HTTP request} req
- *  @param {HTTP response} res
- */
-const getFilteredMovies = async (req, res) => {
-  const { id: user_id } = req.user;
-  const { filter } = req.body;
-  try {
-    const filteredMovies = await movies.findAll({
-      where: { user_id },
-      order: [[filter.type, filter.value]],
-    });
-    if (filteredMovies) {
-      res.send(filteredMovies).status(201);
-    }
-  } catch (error) {
-    console.log(error);
-    res.json({ message: error.message }).status("401");
-  }
-};
 /**
  *  delete movie from user's account
  *  @param {HTTP request} req
@@ -90,37 +76,70 @@ const getFilteredMovies = async (req, res) => {
  */
 const deleteMovie = async (req, res) => {
   const { id } = req.params;
-  try {
-    movies.destroy({
-      where: { id },
-    });
-    res.send(200);
-  } catch (error) {
-    console.log(error);
-    res.json({ message: error.message }).status("401");
+  const movieExists = await Movie.findAll({ where: { id } });
+  if (movieExists) {
+    try {
+      Movie.destroy({
+        where: { id },
+      });
+      res.json(createResponse(201, "movie deleted"));
+    } catch (error) {
+      if (error) {
+        res.send(error.message);
+      }
+    }
+  } else {
+    res.send("movie does not exist").status(401);
   }
 };
 
 /**
- *  update movie 
+ *  update movie
  *  @param {HTTP request} req
  *  @param {HTTP response} res
  */
 const updateMovie = async (req, res) => {
   const { id } = req.params;
-  try {
-    await movies.update(req.body, { where: { id } });
-    res.status(201).send("Movie updated");
-  } catch (error) {
-    console.log(error);
-    res.json({ message: error.message }).status(401);
+  const movieExists = await Movie.findAll({ where: { id } });
+  if (movieExists) {
+    try {
+      await Movie.update(req.body, { where: { id } });
+      res.json(createResponse(201, "movie updated"));
+    } catch (error) {
+      if (error) {
+        res.send(error.message);
+      }
+    }
+  } else {
+    res.send("Movie does not exist").status(401);
   }
 };
 
+/**
+ *  update movie
+ *  @param {HTTP request} req
+ *  @param {HTTP response} res
+ */
+const getMovieWithID = async (req, res) => {
+  const { id } = req.params;
+  const movieExists = await Movie.findOne({ where: { id } });
+  try {
+    if (movieExists) {
+      const movie = movieExists.dataValues;
+      res.send(movie).status(200);
+    } else {
+      res.json(createResponse(401, "movie does not exist"));
+    }
+  } catch (error) {
+    if (error) {
+      res.send(error.message);
+    }
+  }
+};
 module.exports = {
-  getAllMovies,
+  getUserMovies,
   addMovie,
-  getFilteredMovies,
   deleteMovie,
   updateMovie,
+  getMovieWithID,
 };

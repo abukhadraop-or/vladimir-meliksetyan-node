@@ -4,32 +4,32 @@ module.exports = {
   async up(queryInterface, Sequelize, done) {
     queryInterface
       .createTable("Users", {
-        id: Sequelize.DataTypes.STRING,
-        username: Sequelize.DataTypes.STRING,
-        email: Sequelize.DataTypes.STRING,
-        password: Sequelize.DataTypes.STRING,
+        id: { type: Sequelize.UUID, primaryKey: true },
+        username: { type: Sequelize.STRING, allowNull: false },
+        email: { type: Sequelize.STRING, allowNull: false },
+        password: { type: Sequelize.STRING, allowNull: false },
       })
 
       .success(() => {
-        queryInterface.createTable("movies", {
-          id: Sequelize.DataTypes.STRING,
-          backdrop_path: Sequelize.DataTypes.STRING,
-          original_language: Sequelize.DataTypes.STRING,
-          original_title: Sequelize.DataTypes.STRING,
-          overview: Sequelize.DataTypes.STRING,
-          popularity: Sequelize.DataTypes.STRING,
-          poster_path: Sequelize.DataTypes.STRING,
-          release_date: Sequelize.DataTypes.STRING,
-          title: Sequelize.DataTypes.STRING,
-          vote_average: Sequelize.DataTypes.STRING,
-          user_id: Sequelize.DataTypes.STRING,
+        queryInterface.createTable("Movie", {
+          id: { type: Sequelize.UUID, primaryKey: true },
+          backdrop_path: { type: Sequelize.STRING, allowNull: false },
+          original_language: { type: Sequelize.STRING, allowNull: false },
+          original_title: { type: Sequelize.STRING, allowNull: false },
+          overview: { type: Sequelize.STRING, allowNull: false },
+          popularity: { type: Sequelize.INTEGER, allowNull: false },
+          poster_path: { type: Sequelize.STRING, allowNull: false },
+          release_date: { type: Sequelize.DATE, allowNull: false },
+          title: { type: Sequelize.STRING, allowNull: false },
+          vote_average: { type: Sequelize.INTEGER, allowNull: false },
+          user_id: { type: Sequelize.STRING, allowNull: false },
         });
         done();
       });
   },
 
   async down(queryInterface, Sequelize) {
-      queryInterface.dropTable("movies");
-      queryInterface.dropTable("Users")
+    queryInterface.dropTable("Movie");
+    queryInterface.dropTable("Users");
   },
 };

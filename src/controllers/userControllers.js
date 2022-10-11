@@ -2,6 +2,7 @@ const { uuid } = require("uuidv4");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
+const createResponse = require("../utils/create-response");
 
 /**
  * create new user and add it to database with uniqe ID
@@ -10,7 +11,6 @@ const { User } = require("../models");
  */
 const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
-  const id = uuid();
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
   // check does user exist with given email or not
@@ -18,18 +18,20 @@ const registerUser = async (req, res) => {
   try {
     const existeingUser = await User.findOne({ where: { email } });
     if (existeingUser) {
-      res.status(409).send("User Already exists with this email");
+      res.json(createResponse(409, "User Already exists with this email"));
     } else {
-      const result = await User.create({
-        id,
+      await User.create({
         username,
         email,
         password: hashedPassword,
       });
-      res.status(201).send("user Created");
+      res.json(createResponse(200));
     }
   } catch (error) {
-    res.send(error.message).status(400);
+    if (error) {
+      console.log(error);
+      res.send(error.message)
+    }
   }
 };
 
@@ -50,14 +52,18 @@ const userLogin = async (req, res) => {
       const checkpassword = await bcrypt.compare(password, user.password);
       const token = jwt.sign(foundUser, process.env.JWT_ACCESS_SECRET);
       if (checkpassword) {
-        res.status(200).send({ token });
-      } else res.send("wrong password");
-    } else res.status(404).send("user does not exist");
+        res.json(createResponse(201, "ok")).send(token);
+      } else {
+        res.send("wrong password");
+      }
+    } else {
+      res.status(404).send("user does not exist");
+    }
   } catch (error) {
-    console.log(error);
-    res.json({error:error.message}).status(401)
+   if (error) {
+     res.send(error.message)
+   }
   }
- 
 };
 
 module.exports = {

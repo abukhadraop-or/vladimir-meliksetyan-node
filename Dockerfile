@@ -1,16 +1,14 @@
 FROM node:16
 
-
 ENV NODE_PATH=./src
-
 
 WORKDIR /app
 
 COPY . /app
 
-RUN rm -rf node_modulesp
-RUN npm ci && npm cache clean --force --silent
+RUN rm -rf node_modules
 
+RUN npm ci && npm cache clean --force --silent
 
 EXPOSE 80
 

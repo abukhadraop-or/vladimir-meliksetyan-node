@@ -28,7 +28,7 @@ const mockRequest = {
   },
 };
 
-describe("unit testing /user/register route", () => {
+describe("unit testing /user/login route", () => {
   it("login controller", async () => {
     jest.spyOn(User, "findOne").mockResolvedValue({
       dataValues: {
@@ -41,6 +41,6 @@ describe("unit testing /user/register route", () => {
     expect(User.findOne).toHaveBeenCalledWith({
       where: { email: mockRequest.body.email }
     });
-    expect(results).toHaveProperty("code", 401);
+    expect(results).toHaveProperty("code", 401); 
   });
 });

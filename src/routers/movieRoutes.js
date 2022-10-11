@@ -1,9 +1,9 @@
 const { Router } = require("express");
 const {
-  getAllMovies,
+  getUserMovies,
   addMovie,
-  getFilteredMovies,
   deleteMovie,
+  getMovieWithID,
   updateMovie,
 } = require("../controllers/moviesControllers");
 const authenticate = require("../middleware/middleware");
@@ -14,13 +14,12 @@ const router = Router();
  * endpoint to get all movies
  */
 
-router.get("/", authenticate, getAllMovies);
+router.get("/", authenticate, getUserMovies);
 
 /**
- * endpoint to get filtered movies
+ * endpoint to get movie with id
  */
-
-router.post("/filter", authenticate, getFilteredMovies);
+router.get("/:id", authenticate, getMovieWithID);
 
 /**
  * endpoint to add new movie
@@ -32,12 +31,12 @@ router.post("/addMovie", authenticate, addMovie);
  * endpoint to delete movie
  */
 
-router.delete("/:id", deleteMovie);
+router.delete("/:id", authenticate, deleteMovie);
 
 /**
  * endpoint to update movie
  */
 
-router.put("/:id", updateMovie);
+router.patch("/:id", authenticate, updateMovie);
 
 module.exports = router;
