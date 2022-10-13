@@ -4,12 +4,12 @@ const { userLogin, registerUser } = require("../controllers/userControllers");
 const router = Router();
 
 /**
- * endpoint to create new user
+ * Handle POST to /user/signup route.
  */
-router.post("/register", registerUser);
+router.post("/signup", registerUser);
 
 /**
- * endpoint to login user
+ * Handle POST to /user/login route.
  */
 router.post("/login", userLogin);
 

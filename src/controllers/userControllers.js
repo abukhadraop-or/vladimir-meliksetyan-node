@@ -1,46 +1,49 @@
-const { uuid } = require("uuidv4");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 const createResponse = require("../utils/create-response");
 
 /**
- * create new user and add it to database with uniqe ID
- * @param {HTTP request} req
- * @param {HTTP response} res
+ * Create new user.
+ *
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
  */
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   const { username, email, password } = req.body;
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
   // check does user exist with given email or not
-
   try {
-    const existeingUser = await User.findOne({ where: { email } });
-    if (existeingUser) {
-      res.json(createResponse(409, "User Already exists with this email"));
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      res.status(409).json(
+        createResponse({
+          code: 409,
+          message: "User Already exists with this email",
+        })
+      );
     } else {
       await User.create({
         username,
         email,
         password: hashedPassword,
       });
-      res.json(createResponse(200));
+      res.status(201).json(createResponse({ message: "User created" }));
     }
   } catch (error) {
-    if (error) {
-      console.log(error);
-      res.send(error.message)
-    }
+    next(error);
   }
 };
 
 /**
  *
- * @param {HTTP request} req
- * @param {HTTP response} res
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
  */
-const userLogin = async (req, res) => {
+const userLogin = async (req, res, next) => {
   const { email, password } = req.body;
   // find user with email
   try {
@@ -49,20 +52,20 @@ const userLogin = async (req, res) => {
     const foundUser = user?.dataValues;
     // check password validation
     if (foundUser) {
-      const checkpassword = await bcrypt.compare(password, user.password);
+      const checkPassword = await bcrypt.compare(password, user.password);
       const token = jwt.sign(foundUser, process.env.JWT_ACCESS_SECRET);
-      if (checkpassword) {
-        res.json(createResponse(201, "ok")).send(token);
+      if (checkPassword) {
+        res.json(createResponse({ code: 200, message: token }));
       } else {
-        res.send("wrong password");
+        res.json(createResponse({ message: "Wrong password" }));
       }
     } else {
-      res.status(404).send("user does not exist");
+      res
+        .status(404)
+        .json(createResponse({ code: 404, message: "User does not exist" }));
     }
   } catch (error) {
-   if (error) {
-     res.send(error.message)
-   }
+    next(error);
   }
 };
 

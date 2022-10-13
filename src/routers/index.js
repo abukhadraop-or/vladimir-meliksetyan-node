@@ -4,12 +4,10 @@ const userRoutes = require("./userRoutes");
 
 const router = Router();
 
-router.use("/movie", movieRoutes);
+router.use("/movies", movieRoutes);
 router.use("/user", userRoutes);
 
 router.use("*", (req, res) => {
-  const message = new Error("page not found");
-  res.send(message).status(401)
- 
+  res.status(404).send("Page not found");
 });
 module.exports = router;

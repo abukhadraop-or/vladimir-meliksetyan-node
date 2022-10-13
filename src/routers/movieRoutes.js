@@ -1,42 +1,37 @@
 const { Router } = require("express");
 const {
-  getUserMovies,
+  getAllMovies,
   addMovie,
   deleteMovie,
-  getMovieWithID,
+  getMovie,
   updateMovie,
 } = require("../controllers/moviesControllers");
 const authenticate = require("../middleware/middleware");
-
 const router = Router();
 
 /**
- * endpoint to get all movies
+ * Handle GET to /movies route.
  */
-
-router.get("/", authenticate, getUserMovies);
+router.get("/", getAllMovies);
 
 /**
- * endpoint to get movie with id
+ * Handle GET to /movies/:id route.
  */
-router.get("/:id", authenticate, getMovieWithID);
+router.get("/:id", authenticate, getMovie);
 
 /**
- * endpoint to add new movie
+ * Handle POST to /movies route.
  */
-
-router.post("/addMovie", authenticate, addMovie);
+router.post("/", authenticate, addMovie);
 
 /**
- * endpoint to delete movie
+ * Handle PATCH to /movies/:id route.
  */
-
-router.delete("/:id", authenticate, deleteMovie);
-
-/**
- * endpoint to update movie
- */
-
 router.patch("/:id", authenticate, updateMovie);
+
+/**
+ * Handle DELETE to /movies/:id route.
+ */
+router.delete("/:id", authenticate, deleteMovie);
 
 module.exports = router;

@@ -1,145 +1,148 @@
 const { Movie } = require("../models");
-const movie = require("../models/movie");
 const createResponse = require("../utils/create-response");
 
 /**
- *  get all users movies
- * @param {HTTP request} req
- * @param {HTTP response} res
+ * Get all movies.
+ *
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
  */
-const getUserMovies = async (req, res) => {
-  const { id } = req.user;
+const getAllMovies = async (req, res, next) => {
   const { filter } = req.body;
+
   try {
-    // take movies from database with user id
     const movies = await Movie.findAll({
-      where: { user_id: id },
       order: filter ? [[filter.type, filter.value]] : [],
     });
     if (movies) {
-      res.send(movies).status(200);
-    } else res.json(createResponse(401, "now movies to show"));
+      res.json(createResponse({ data: movies })).status(200);
+    } else res.json(createResponse(401, "no movies to show"));
   } catch (error) {
-    if (error) {
-      res.send(error.message);
-    }
+    next(error);
   }
 };
 
 /**
- *  add movie to user's account
- *  @param {HTTP request} req
- *  @param {HTTP response} res
+ * Get movie by id.
+ *
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
  */
-
-const addMovie = async (req, res) => {
-  const { id: user_id } = req.user;
-
-  // take movie information from request
-  const {
-    original_language,
-    original_title,
-    overview,
-    popularity,
-    poster_path,
-    backdrop_path,
-    release_date,
-    title,
-    vote_average,
-  } = req.body;
-  // create movie in DB
-  try {
-    await Movie.create({
-      original_language,
-      backdrop_path,
-      original_title,
-      overview,
-      popularity,
-      poster_path,
-      release_date,
-      title,
-      vote_average,
-      user_id,
-    });
-    res.status(201);
-  } catch (error) {
-    if (error) {
-      res.send(error.message);
-    }
-  }
-};
-
-/**
- *  delete movie from user's account
- *  @param {HTTP request} req
- *  @param {HTTP response} res
- */
-const deleteMovie = async (req, res) => {
-  const { id } = req.params;
-  const movieExists = await Movie.findAll({ where: { id } });
-  if (movieExists) {
-    try {
-      Movie.destroy({
-        where: { id },
-      });
-      res.json(createResponse(201, "movie deleted"));
-    } catch (error) {
-      if (error) {
-        res.send(error.message);
-      }
-    }
-  } else {
-    res.send("movie does not exist").status(401);
-  }
-};
-
-/**
- *  update movie
- *  @param {HTTP request} req
- *  @param {HTTP response} res
- */
-const updateMovie = async (req, res) => {
-  const { id } = req.params;
-  const movieExists = await Movie.findAll({ where: { id } });
-  if (movieExists) {
-    try {
-      await Movie.update(req.body, { where: { id } });
-      res.json(createResponse(201, "movie updated"));
-    } catch (error) {
-      if (error) {
-        res.send(error.message);
-      }
-    }
-  } else {
-    res.send("Movie does not exist").status(401);
-  }
-};
-
-/**
- *  update movie
- *  @param {HTTP request} req
- *  @param {HTTP response} res
- */
-const getMovieWithID = async (req, res) => {
+const getMovie = async (req, res, next) => {
   const { id } = req.params;
   const movieExists = await Movie.findOne({ where: { id } });
   try {
     if (movieExists) {
       const movie = movieExists.dataValues;
-      res.send(movie).status(200);
+      res.json(createResponse({ data: movie })).status(200);
     } else {
-      res.json(createResponse(401, "movie does not exist"));
+      res.json(createResponse(401, "Movie does not exist"));
     }
   } catch (error) {
-    if (error) {
-      res.send(error.message);
-    }
+    next(error);
   }
 };
+
+/**
+ * Create new movie.
+ *
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
+ */
+const addMovie = async (req, res, next) => {
+  // take movie information from request
+  const {
+    originalLanguage,
+    originalTitle,
+    overview,
+    popularity,
+    posterPath,
+    backdropPath,
+    releaseDate,
+    title,
+    voteAverage,
+  } = req.body;
+
+  // create movie in DB
+  try {
+    const data = await Movie.create({
+      originalLanguage,
+      backdropPath,
+      originalTitle,
+      overview,
+      popularity,
+      posterPath,
+      releaseDate,
+      title,
+      voteAverage,
+    });
+    res.status(201).json(createResponse({ code: 201, data }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update an existing movie.
+ *
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
+ */
+const updateMovie = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const movieExists = await Movie.findAll({ where: { id } });
+    if (movieExists.length) {
+      const [, data] = await Movie.update(req.body, {
+        where: { id },
+        returning: true,
+      });
+      res.json(createResponse({ data }));
+    } else {
+      res
+        .status(404)
+        .json(createResponse({ code: 404, message: "Movie does not exist" }));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Delete movie.
+ *
+ * @param {import('express').Request} req Express route request.
+ * @param {import('express').Response} res Express route response.
+ * @param {import('express').NextFunction} next Express route next function.
+ */
+const deleteMovie = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const movieExists = await Movie.findAll({ where: { id } });
+    if (movieExists.length) {
+      Movie.destroy({
+        where: { id },
+      });
+      res.json(createResponse({ message: "Movie deleted" }));
+    } else {
+      res
+        .status(404)
+        .json(createResponse({ code: 404, message: "Movie does not exist" }));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
-  getUserMovies,
+  getAllMovies,
   addMovie,
   deleteMovie,
   updateMovie,
-  getMovieWithID,
+  getMovie,
 };

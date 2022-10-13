@@ -1,10 +1,13 @@
 const jwt = require("jsonwebtoken");
+const createResponse = require("../utils/create-response");
 
 /**
- * 
- * @param {HTTP request} req 
- * @param {HTTP response} res 
- * @param {Function} next 
+ * Check if the token valid.
+ *
+ * @param {express.Request}      req Token.
+ * @param {express.Response}     res
+ * @param {express.NextFunction} next
+ *
  * @returns {response.status}
  */
 const authenticate = (req, res, next) => {
@@ -12,10 +15,16 @@ const authenticate = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   // split and take only token part
   const token = authHeader && authHeader.split(" ")[1];
-  if (token == null) return res.status(401).send();
+  if (!token)
+    return res
+      .status(401)
+      .json(createResponse({ code: 401, message: "There is no token." }));
   // create token if it not exists
   jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, user) => {
-    if (err) return res.status(403).send();
+    if (err)
+      return res
+        .status(403)
+        .json(createResponse({ code: 403, message: "Invalid token." }));
     req.user = user;
     next();
   });

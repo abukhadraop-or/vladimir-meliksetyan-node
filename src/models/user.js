@@ -1,32 +1,33 @@
-const { Model } = require("sequelize");
-const Sequelize = require("sequelize-mock");
-const { sequelize } = require('../models/index')
+const { Model, Sequelize } = require("sequelize");
 
+class User extends Model {}
+
+/**
+ * @type {typeof User}
+ */
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
-    static associate(models){}
-  }
- /**
-   * initilaize user model, representing User model in the DB, with atributes and options
+  /**
+   * initialize user model, representing User model in the DB, with attributes and options
    */
   User.init(
     {
       id: {
         description: "Primary key",
-        type: Sequelize.UUID,
-        allowNull: false,
+        type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: Sequelize.literal("uuid_generate_v4()"),
       },
       username: {
         description: "User name",
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       email: {
         description: "Email",
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       password: {
         description: "Password",
@@ -39,8 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
       modelName: "User",
       tableName: "Users",
-      createdAt: false,
-      updatedAt: false,
+      freezeTableName: true,
     }
   );
 

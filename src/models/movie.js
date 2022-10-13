@@ -1,22 +1,21 @@
-const { Model } = require("sequelize");
-const Sequelize = require("sequelize-mock");
-const { sequelize } = require("../models/index");
+const { Model, Sequelize } = require("sequelize");
 
+class Movie extends Model {}
+
+/**
+ * @type {typeof Movie}
+ */
 module.exports = (sequelize, DataTypes) => {
-  class Movie extends Model {
-    static associate(models) {}
-  }
   /**
-   * initilaize movie model, representing Movie model in the DB, with atributes and options
+   * initialize movie model, representing a table in the DB, with attributes and options
    */
   Movie.init(
     {
       id: {
+        description: "Primary key",
         type: DataTypes.UUID,
-        description: "primary key",
-        allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
+        defaultValue: Sequelize.literal("uuid_generate_v4()"),
       },
       backdropPath: {
         description: "Backdrop Path",
@@ -62,17 +61,12 @@ module.exports = (sequelize, DataTypes) => {
         description: "Movie Title",
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
-      vote_average: {
+      voteAverage: {
         description: "Vote Average",
         type: DataTypes.INTEGER,
         field: "vote_average",
-        allowNull: false,
-      },
-      userId: {
-        description: "user ID",
-        type: DataTypes.UUID,
-        field: "user_id",
         allowNull: false,
       },
     },
@@ -81,8 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
       modelName: "Movie",
       tableName: "Movie",
-      createdAt: false,
-      updatedAt: false,
+      freezeTableName: true,
     }
   );
 
