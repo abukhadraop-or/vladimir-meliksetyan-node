@@ -1,0 +1,36 @@
+version: '2'
+services:
+  moviedb-ds-base:
+    container_name: moviedb-ds-base
+    build: 
+      context: .
+      args:
+        - NODE_ENV=development
+    environment: 
+      DB_HOST: MovieDb-postgres
+      DB_NAME: MovieDb
+      DB_PASSWORD: 099995457
+      DB_PORT: 5432
+      DB_USERNAME: vladimir
+      PORT: 3000
+      NODE_ENV: development
+      VIRTUAL_HOST: MovieDb.docker
+    ports:
+      - 3000:3000 
+    volumes:
+      - ${PWD}:/app
+    depends_on:
+    - moviedb-ds
+    
+  moviedb-ds:
+    container_name: moviedb-ds
+    image: postgres:14.1
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      VIRTUAL_HOST: MovieDb.docker
+    ports:
+    - 5432
+ 
+      
