@@ -3,7 +3,7 @@ const {
   addMovie,
   deleteMovie,
 } = require("../controllers/moviesControllers");
-const { movies } = require("../models");
+const { Movie } = require("../models");
 
 jest.mock("../models");
 const results = {};
@@ -34,19 +34,21 @@ const mockRequest = {
   },
 };
 
+const mockNext = (message) => {
+  return message;
+};
+
 describe("unit testing /movies/getAllMovies route", () => {
   it("taking user moives", async () => {
     await getAllMovies(mockRequest, mockResponse);
 
-    expect(movies.findAll).toHaveBeenCalledWith({
-      where: { user_id: mockRequest.user.id },
-    });
+    expect(Movie.findAll).toHaveBeenCalled();
   });
 
   it("Movies were successfully taken from DB", async () => {
     await getAllMovies(mockRequest, mockResponse);
 
-    expect(results).toHaveProperty("Movies");
+    expect(results.message).toHaveProperty("code",200);
   });
   it("add Movies to user account", async () => {
     const mockRequestMovies = {
@@ -67,15 +69,15 @@ describe("unit testing /movies/getAllMovies route", () => {
       },
     };
     await addMovie(mockRequestMovies, mockResponse);
-    expect(movies.create).toHaveBeenCalledWith(
+    expect(Movie.create).toHaveBeenCalledWith(
       expect.objectContaining({ overview: mockRequestMovies.body.overview })
     );
   });
 
   it("delete movie", async () => {
-    await deleteMovie(mockRequest, mockResponse);
-    expect(movies.destroy).toHaveBeenCalledWith({
-      where: { id: mockRequest.user.id },
+    await deleteMovie(mockRequest, mockResponse,mockNext);
+    expect(Movie.findAll).toHaveBeenCalledWith({
+      where: { id: mockRequest.params.id },
     });
     expect(results).toHaveProperty("code", 201);
   });

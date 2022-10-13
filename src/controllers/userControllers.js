@@ -54,6 +54,7 @@ const userLogin = async (req, res, next) => {
     if (foundUser) {
       const checkPassword = await bcrypt.compare(password, user.password);
       const token = jwt.sign(foundUser, process.env.JWT_ACCESS_SECRET);
+      
       if (checkPassword) {
         res.json(createResponse({ code: 200, message: token }));
       } else {
@@ -63,6 +64,7 @@ const userLogin = async (req, res, next) => {
       res
         .status(404)
         .json(createResponse({ code: 404, message: "User does not exist" }));
+      console.log(createResponse());
     }
   } catch (error) {
     next(error);

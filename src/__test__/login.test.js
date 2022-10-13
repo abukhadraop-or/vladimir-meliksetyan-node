@@ -3,9 +3,9 @@ const { User } = require("../models");
 
 jest.mock("../models");
 jest.mock("jsonwebtoken");
+jest.mock("../utils/create-response")
 
-const results = {};
-
+const results = {}
 const mockResponse = {
   send: (message) => {
     results.message = message;
@@ -15,8 +15,8 @@ const mockResponse = {
     results.code = code;
     return mockResponse;
   },
-  json: (message) => {
-    results.message = message;
+  json: (output) => {
+    results.json = output;
     return mockResponse;
   },
 };
@@ -28,6 +28,10 @@ const mockRequest = {
   },
 };
 
+const mockNext = (message) => {
+  return message;
+};
+
 describe("unit testing /user/login route", () => {
   it("login controller", async () => {
     jest.spyOn(User, "findOne").mockResolvedValue({
@@ -36,11 +40,10 @@ describe("unit testing /user/login route", () => {
           "$2b$10$PpW32e3Bc5NnsH//nGNrSeBsWDXq/zTII04AztAzZ5fMGOER9drdW",
       },
     });
-    await userLogin(mockRequest, mockResponse);
+    await userLogin(mockRequest, mockResponse, mockNext);
 
     expect(User.findOne).toHaveBeenCalledWith({
-      where: { email: mockRequest.body.email }
+      where: { email: mockRequest.body.email },
     });
-    expect(results).toHaveProperty("code", 401); 
   });
 });

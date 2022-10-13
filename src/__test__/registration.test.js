@@ -23,9 +23,13 @@ const mockRequest = {
   },
 };
 
+const mockNext = (message) => {
+  return message;
+};
+
 describe("unit testing /user/register route", () => {
-  it("register controllexr", async () => {
-    await registerUser(mockRequest, mockResponse);
+  it("register controller", async () => {
+    await registerUser(mockRequest, mockResponse, mockNext);
 
     expect(User.create).toHaveBeenCalledWith(
       expect.objectContaining({ email: mockRequest.body.email })
@@ -33,8 +37,7 @@ describe("unit testing /user/register route", () => {
   });
 
   it("registration successfully done", async () => {
-    await registerUser(mockRequest, mockResponse);
-
+    await registerUser(mockRequest, mockResponse,mockNext);
     expect(results).toHaveProperty("code", 201);
   });
 });
