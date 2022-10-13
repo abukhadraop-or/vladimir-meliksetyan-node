@@ -128,7 +128,6 @@ const deleteMovie = async (req, res, next) => {
       Movie.destroy({
         where: { id },
       });
-      console.log(11111111111111111);
       res.json(createResponse({ message: "Movie deleted" }));
     } else {
       res
